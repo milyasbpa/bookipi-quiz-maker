@@ -1,7 +1,30 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { QuizCreateContainer } from './QuizCreate.container';
+
+// Mock next/dynamic to bypass lazy loading in tests
+vi.mock('next/dynamic', () => ({
+  default: (fn: () => Promise<any>, options?: any) => {
+    // For test purposes, synchronously return a wrapper component
+    // that will render once the dynamic import resolves
+    const DynamicComponent = (props: any) => {
+      const [LoadedComponent, setLoadedComponent] = React.useState<any>(null);
+
+      React.useEffect(() => {
+        fn().then((mod) => {
+          setLoadedComponent(() => mod.AddQuestions || mod.QuestionList || mod.default || mod);
+        });
+      }, []);
+
+      if (!LoadedComponent) return null;
+      return <LoadedComponent {...props} />;
+    };
+
+    return DynamicComponent;
+  },
+}));
 
 vi.mock('../sections/quiz-info', () => ({
   QuizInfo: () => <div data-testid="quiz-info-section">Quiz Info Section</div>,
@@ -17,6 +40,7 @@ vi.mock('@/core/components', () => ({
       Step {currentStep} of {totalSteps}
     </div>
   ),
+  LoadingState: ({ message }: any) => <div data-testid="loading-state">{message}</div>,
 }));
 
 let mockCurrentStep = 1;
@@ -46,12 +70,14 @@ describe('QuizCreateContainer', () => {
     expect(screen.queryByTestId('add-questions-section')).not.toBeInTheDocument();
   });
 
-  it('renders AddQuestions section on step 2', () => {
+  it('renders AddQuestions section on step 2', async () => {
     mockCurrentStep = 2;
 
     render(<QuizCreateContainer />);
     expect(screen.queryByTestId('quiz-info-section')).not.toBeInTheDocument();
-    expect(screen.getByTestId('add-questions-section')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('add-questions-section')).toBeInTheDocument();
+    });
   });
 
   it('applies correct container styles', () => {
