@@ -1,0 +1,1 @@
+export { QuizTable } from './QuizTable';

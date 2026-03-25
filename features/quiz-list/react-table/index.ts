@@ -1,0 +1,1 @@
+export { useQuizListTable } from './useQuizListTable';
