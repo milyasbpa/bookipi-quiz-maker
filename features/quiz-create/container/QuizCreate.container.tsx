@@ -1,10 +1,20 @@
 'use client';
 
-import { StepIndicator } from '@/core/components';
+import dynamic from 'next/dynamic';
 
-import { AddQuestions } from '../sections/add-questions';
+import { LoadingState, StepIndicator } from '@/core/components';
+
 import { QuizInfo } from '../sections/quiz-info';
 import { useQuizCreateStore } from '../store/quiz-create.store';
+
+// Lazy load AddQuestions section because it includes @dnd-kit drag-and-drop library
+const AddQuestions = dynamic(
+  () => import('../sections/add-questions').then((mod) => mod.AddQuestions),
+  {
+    loading: () => <LoadingState message="Loading question builder..." />,
+    ssr: false,
+  },
+);
 
 export function QuizCreateContainer() {
   const { currentStep } = useQuizCreateStore();
