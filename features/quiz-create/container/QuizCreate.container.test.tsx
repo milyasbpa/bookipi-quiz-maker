@@ -4,11 +4,8 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { QuizCreateContainer } from './QuizCreate.container';
 
-// Mock next/dynamic to bypass lazy loading in tests
 vi.mock('next/dynamic', () => ({
   default: (fn: () => Promise<any>, options?: any) => {
-    // For test purposes, synchronously return a wrapper component
-    // that will render once the dynamic import resolves
     const DynamicComponent = (props: any) => {
       const [LoadedComponent, setLoadedComponent] = React.useState<any>(null);
 

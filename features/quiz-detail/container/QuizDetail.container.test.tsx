@@ -4,13 +4,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { QuizDetailContainer } from './QuizDetail.container';
 
-// Mock next-intl to avoid context errors
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
   useLocale: () => 'en',
 }));
 
-// Mock next/navigation
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: '1' }),
   useRouter: () => ({
@@ -21,11 +19,8 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/',
 }));
 
-// Mock next/dynamic to bypass lazy loading in tests
 vi.mock('next/dynamic', () => ({
   default: (fn: () => Promise<any>, options?: any) => {
-    // For test purposes, synchronously return a wrapper component
-    // that will render once the dynamic import resolves
     const DynamicComponent = (props: any) => {
       const [LoadedComponent, setLoadedComponent] = React.useState<any>(null);
 
@@ -75,9 +70,6 @@ describe('QuizDetailContainer', () => {
 
   it('renders question list section (lazy loaded)', async () => {
     render(<QuizDetailContainer />);
-    // Since QuestionList is dynamically imported, it may show loading state initially
-    // The important thing is that the container structure is correct
-    // QuestionList has its own dedicated test suite for its functionality
     const container = screen.getByTestId('quiz-header').parentElement;
     expect(container).toBeInTheDocument();
     expect(container).toHaveClass('container', 'mx-auto', 'max-w-6xl');
